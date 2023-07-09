@@ -5,10 +5,15 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const path = require("path");
-const multer  = require('multer')
+
+const upload = require("./services/upload")
+const {watermark} = require("./services/watermark")
+const processReq = require("./services/process")
+const  { rename, readFile ,remove} = require("./services/storage")
 var fs = require('fs');
-const PDFWatermark= require('pdf-watermark');
+const dir = require('./models/const')
+var upload_dir = dir.upload_dir
+
 // defining the Express app
 const app = express();
 app.use(express.json())
@@ -16,50 +21,6 @@ app.use(express.json())
 const ads = [
   {title: 'Hello, world (again)!'}
 ];
-
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "./");
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.mimetype.split("/")[1];
-//     cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-//   },
-// });
-
-// const multerFilter = (req, file, cb) => {
-//   if (file.mimetype.split("/")[1] === "pdf") {
-//     cb(null, true);
-//   } else {
-//     cb(new Error("Not a PDF File!!"), false);
-//   }
-// };
-function checkFileType(file, cb) {
-  // Allowed ext
-  const filetypes = /pdf/;
-  // Check ext
-  const extname = filetypes.test(
-      path.extname(file.originalname).toString()
-  );
-  // Check mime
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (mimetype && extname) {
-      return cb(null, true);
-  } else {
-      cb("Error: PDF Only!");
-  }
-}
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  }
-})
-
-var upload = multer({ storage: storage , fileFilter: function (req, file, cb) {
-  checkFileType(file, cb);
-},});
-// const upload = multer({dest : "uploads/"});
 
 // adding Helmet to enhance your Rest API's security
 app.use(helmet());
@@ -81,35 +42,27 @@ app.post('/test', upload.any(),  async (req, res,next) => {
   
   
 // var fileName = req.file.filename
+
+console.log("api")
 console.log(req.body)
-var watermark = req.body.data
-var files = req.files
-console.log(files[0].filename)
-var fileName = files[0].filename
-var originalFileName = files[0].originalname
-var outputFilename = originalFileName.toLowerCase().split(' ').join('_')
-var watermarkedFileName = "watermarked_"+ outputFilename
+const [outputFilename, watermarkedFileName, watermark_text, fileName] =processReq(req.body.data,req.files)
 console.log(req.files)
-var fs = require('fs');
-fs.rename( 'uploads/'+fileName, 'uploads/'+outputFilename, function(err) {
-    if ( err ) console.log('ERROR: ' + err);
-});
-  await PDFWatermark({
-    pdf_path: "uploads/"+outputFilename, 
-    text: watermark, 
-    textOption:{
-      diagonally:true
-  },
-    output_dir: "uploads/"+watermarkedFileName, // remove to override file
-  });
-  var file = fs.createReadStream("uploads/"+watermarkedFileName);
-  var stat = fs.statSync("uploads/"+watermarkedFileName);
-  res.setHeader('Content-Length', stat.size);
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename='+watermarkedFileName);
-  file.pipe(res);
-  fs.unlink("uploads/"+outputFilename,(err) => err && console.error(err))
-  fs.unlink("uploads/"+watermarkedFileName,(err) => err && console.error(err))
+
+
+
+
+rename(fileName,outputFilename)
+console.log(upload_dir+watermarkedFileName)
+await watermark(upload_dir+outputFilename,watermark_text,upload_dir)
+
+const [file,stat ]= readFile(outputFilename);
+ 
+res.setHeader('Content-Length', stat.size);
+res.setHeader('Content-Type', 'application/pdf');
+res.setHeader('Content-Disposition', 'attachment; filename='+watermarkedFileName);
+file.pipe(res);
+  
+remove(outputFilename,watermarkedFileName)
  
 
 
