@@ -1,0 +1,24 @@
+config:
+  target: "http://localhost:3001"
+  processor: "custom.js"
+  environments:
+    #
+    # This is our load testing profile, where we create a lot of virtual users.
+    # Note that we don't load the plugin here, so that we don't see the output
+    # from the plugin.
+    #
+    load:
+      phases:
+        - duration: 600
+          arrivalRate: 8
+    
+scenarios:
+  # Your scenario definitions go here.
+- name: pdfwatermark
+  flow:
+  - post:
+      url: /test
+      beforeRequest: 'addMultipartFormData'
+      expect:
+          - statusCode: 200
+ 
