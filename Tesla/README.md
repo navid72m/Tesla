@@ -20,6 +20,7 @@ npm test
 
 To run load test 
 ```bash
+node src
 npm run load_test
 ```
 The file output.txt.html will be generated and load test result can be seen there.
