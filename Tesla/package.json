@@ -42,7 +42,7 @@
     
   "test": "mocha",
 
-  "load_test" : "cd load_test && npx artillery run  -o output.txt my-script.yml && npx artillery report output.txt"
+  "load_test" : "node src & cd load_test && npx artillery run  -o output.txt my-script.yml && npx artillery report output.txt"
   
   },
   
