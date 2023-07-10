@@ -20,6 +20,7 @@ function rename(fileName,outputFilename){
 function remove(outputFilename, watermarkedFileName){
   console.log("remove")
   fs.unlink(upload_dir+outputFilename,(err) => err && console.error(err))
+  
 //   fs.unlink(upload_dir+watermarkedFileName,(err) => err && console.error(err))
 }
 

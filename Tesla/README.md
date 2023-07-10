@@ -20,10 +20,7 @@ npm test
 
 To run load test 
 ```bash
-cd load_test
-npm install -g artillery@latest 
-artillery run  -o output.txt my-script.yml
-artillery report output.txt
+npm run load_test
 ```
 The file output.txt.html will be generated and load test result can be seen there.
 ## Usage

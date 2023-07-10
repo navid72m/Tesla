@@ -36,12 +36,12 @@ it('should upload a file',
       .post("/test")
       .set('Content-Type', 'application/form-data')
       .field('data', 'Hello World')
-      .attach(null,
-        fs.readFileSync('./Thesis_Navid.pdf'),
+      .attach("pdfFile",
+        fs.readFileSync('./test/input/Thesis_Navid.pdf'),
         'Thesis_Navid.pdf')
         .buffer()
         .parse(binaryParser)
-        .end(function(err, res) {
+        .end(async function(err, res) {
             if (err) { done(err); }
            
             res.should.have.status(200);
@@ -50,12 +50,12 @@ it('should upload a file',
             res.should.have.header('content-type');
             res.header['content-type'].should.be.equal('application/pdf');
             res.should.have.header('content-length');
-            const size = fs.statSync('./watermarked_thesis_navid.pdf').size.toString();
+            const size = fs.statSync('./test/output/thesis_navid.pdf').size.toString();
             res.header['content-length'].should.be.equal(size);
            
             // verify checksum 
             // console.log(JSON.stringify(res.body))               
-            expect(md5(res.body.data)).to.equal('8f321ce7ee068fe9c85fea5e68b22be3');              
+           expect(md5(res.body.data)).to.equal('8f321ce7ee068fe9c85fea5e68b22be3');              
         });
   },
 );

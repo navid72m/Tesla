@@ -1,3 +1,4 @@
+const fs = require('fs');
 const multer  = require('multer')
 const path = require("path");
 const dir = require('../models/const')
@@ -10,7 +11,7 @@ function checkFileType(file, cb) {
     const extname = filetypes.test(
         path.extname(file.originalname).toString()
     );
-    // Check mime
+    
     const mimetype = filetypes.test(file.mimetype);
   
     if (mimetype && extname) {
@@ -27,6 +28,7 @@ function checkFileType(file, cb) {
   
   var upload = multer({ storage: storage , fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
+   
   },});
 
 module.exports=upload
